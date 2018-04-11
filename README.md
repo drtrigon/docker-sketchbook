@@ -1,8 +1,8 @@
 [![Build Status](https://travis-ci.org/drtrigon/docker-sketchbook.svg?branch=master)](https://travis-ci.org/drtrigon/docker-sketchbook)
 
-(docker status? also in docker-arduino and sketchbook)
+Helper for https://github.com/drtrigon/sketchbook
 
-https://github.com/drtrigon/docker-arduino
+Requires https://github.com/drtrigon/docker-arduino
 
 ## Setup
 Overload Origin with Both Remotes in order to clone and set this repo up use:
