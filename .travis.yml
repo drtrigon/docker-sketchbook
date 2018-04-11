@@ -1,51 +1,39 @@
-# $DOCKER_USER and $DOCKER_PASS in Settings > Environment Variables
-
 language: bash
 
 sudo: false
 
 env:
-  - DOCKERFILE=Dockerfile.ubuntu DOCKERTAG=ubuntu-14.04
-  #- DOCKERFILE=Dockerfile.ubuntu-16.04 DOCKERTAG=ubuntu-16.04
-  #- DOCKERFILE=Dockerfile.centos DOCKERTAG=centos-7
-  #- DOCKERFILE=Dockerfile.debian DOCKERTAG=debian-jessie
-  #- DOCKERFILE=Dockerfile.debian-jessie-toollabs DOCKERTAG=debian-jessie-toollabs
+  global:
+    - DOCKER=drtrigon/docker-arduino DOCKERTAG=ubuntu-14.04  # ARDUINO_VERSION=1.8.2
+  matrix:
+    #- BOARD="arduino:avr:uno"
+    - BOARD="arduino:avr:nano:cpu=atmega328"
 
 services:
   - docker
 
 install:
-  - COMMIT=${TRAVIS_COMMIT::8} ;
-  - REPO=drtrigon/docker-sketchbook ;
-  - LATEST=ubuntu-14.04 ;
-#  - docker login -u $DOCKER_USER -p $DOCKER_PASS ;
-  - docker build -f $DOCKERFILE -t $REPO:$COMMIT . ;
-#  - docker tag $REPO:$COMMIT $REPO:$DOCKERTAG ;
-#  # - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER ;
-#  - if [[ "$DOCKERTAG" == "$LATEST" ]] ; then
-#      docker tag $REPO:$COMMIT $REPO:latest ;
-#    fi
+  - docker pull $DOCKER:$DOCKERTAG ;
 
-#script:
-#  - docker images ;
-##  - docker run -w /opt/file-metadata -t --rm $REPO:$COMMIT python -m pytest ;
-#  - docker run -t --rm $REPO:$COMMIT git clone https://github.com/drtrigon/sketchbook.git ;
-##  - docker run -t --rm $REPO:$COMMIT arduino --verify --board $BOARD --verbose --preserve-temp-files $PWD/sketchbook/MultiWii_2_4/MultiWii/MultiWii.ino ;
-#  - docker run -t --rm $REPO:$COMMIT arduino --verify --board "arduino:avr:nano:cpu=atmega328" --verbose --preserve-temp-files sketchbook/MultiWii_2_4/MultiWii/MultiWii.ino ;
-#  - docker rmi $REPO:$COMMIT
-#  # Upload to docker if it's on the master branch
-#  - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] ; then
-#      docker push $REPO ;
-#    fi
-
-#after_success:
-#  - |-
-#    if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] ; then
-#      if [[ "$DOCKERTAG" == "$LATEST" ]] ; then
-#        curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Travis-API-Version: 3" -H "Authorization: token $TRAVIS_TOKEN" -d "{\"request\": {\"branch\":\"master\"}}" https://api.travis-ci.org/repo/drtrigon%2Fdocker-file-metadata-wikibot/requests ;
-#        curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Travis-API-Version: 3" -H "Authorization: token $TRAVIS_TOKEN" -d "{\"request\": {\"branch\":\"master\"}}" https://api.travis-ci.org/repo/drtrigon%2Finstall-file-metadata-wikibot/requests ;
-#      fi ;
-#    fi
+script:
+  - docker images ;
+  - docker run -t -d --name testing $DOCKER:$DOCKERTAG bin/bash ;
+  - docker ps -l ;
+  - docker exec -t testing apt-get install -y git ;
+  - docker exec -t testing git clone https://github.com/drtrigon/sketchbook.git ;
+  - docker exec -t testing arduino --verify --board $BOARD --verbose --preserve-temp-files sketchbook/MultiWii_2_4/MultiWii/MultiWii.ino ;
+  # Output post-verify info
+  - docker exec -t testing arduino export ELF_FILE=`find /tmp/ -name "MultiWii.ino.elf"` ;
+  - docker exec -t testing arduino readelf -a $ELF_FILE
+  - docker exec -t testing arduino strings -d $ELF_FILE
+  - docker exec -t testing arduino size $ELF_FILE
+  - docker exec -t testing arduino tree
+  - docker stop testing ;
+  - docker rm testing ;
+  #- docker rmi $DOCKER:$DOCKERTAG
+  #- docker images ;
+  #- docker container ls ;
+  - docker ps -l ;
 
 notifications:
   email: false
