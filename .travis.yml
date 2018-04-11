@@ -4,7 +4,7 @@ sudo: false
 
 env:
   global:
-    - DOCKER=drtrigon/docker-arduino DOCKERTAG=ubuntu-14.04  # ARDUINO_VERSION=1.8.2
+    - REPO=drtrigon/docker-arduino DOCKERTAG=ubuntu-14.04  # ARDUINO_VERSION=1.8.2
   matrix:
     #- BOARD="arduino:avr:uno"
     - BOARD="arduino:avr:nano:cpu=atmega328"
@@ -13,11 +13,11 @@ services:
   - docker
 
 install:
-  - docker pull $DOCKER:$DOCKERTAG ;
+  - docker pull $REPO:$DOCKERTAG ;
 
 script:
   - docker images ;
-  - docker run -t -d --name testing $DOCKER:$DOCKERTAG bin/bash ;
+  - docker run -t -d --name testing $REPO:$DOCKERTAG bin/bash ;
   - docker ps -l ;
   - docker exec -t testing  apt-get install -y git binutils tree ;
   - docker exec -t testing  git clone https://github.com/drtrigon/sketchbook.git ;
@@ -29,7 +29,7 @@ script:
   - docker exec -t testing  tree ;
   - docker stop testing ;
   - docker rm testing ;
-  #- docker rmi $DOCKER:$DOCKERTAG
+  #- docker rmi $REPO:$DOCKERTAG
   #- docker images ;
   #- docker container ls ;
   - docker ps -l ;
