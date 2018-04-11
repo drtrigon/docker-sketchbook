@@ -23,11 +23,9 @@ script:
   - docker exec -t testing git clone https://github.com/drtrigon/sketchbook.git ;
   - docker exec -t testing arduino --verify --board $BOARD --verbose --preserve-temp-files sketchbook/MultiWii_2_4/MultiWii/MultiWii.ino ;
   # Output post-verify info
-  - docker exec -t testing /bin/bash -c 'export ELF_FILE=`find /tmp/ -name "MultiWii.ino.elf"`' ;
-  - docker exec -t testing /bin/bash -c 'echo $ELF_FILE' ;
-  - docker exec -t testing readelf -a $ELF_FILE
-  - docker exec -t testing strings -d $ELF_FILE
-  - docker exec -t testing size $ELF_FILE
+  - docker exec -t testing readelf -a `find /tmp/ -name "MultiWii.ino.elf"` ;
+  - docker exec -t testing strings -d `find /tmp/ -name "MultiWii.ino.elf"` ;
+  - docker exec -t testing size `find /tmp/ -name "MultiWii.ino.elf"` ;
   - docker exec -t testing tree
   - docker stop testing ;
   - docker rm testing ;
