@@ -19,6 +19,7 @@ script:
   - docker images ;
   - docker run -t -d --name testing $REPO:$DOCKERTAG bin/bash ;
   - docker ps -l ;
+  - docker exec -t testing  apt-get update ;
   - docker exec -t testing  apt-get install -y git binutils tree ;
   - docker exec -t testing  git clone https://github.com/drtrigon/sketchbook.git ;
   - docker exec -t testing  arduino --verify --board $BOARD --verbose --preserve-temp-files sketchbook/MultiWii_2_4/MultiWii/MultiWii.ino ;
